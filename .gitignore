@@ -1,0 +1,5 @@
+*.exe
+*.ilk
+*.obj
+*.pdb
+tests_results.txt
