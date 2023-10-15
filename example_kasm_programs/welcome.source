@@ -1,0 +1,47 @@
+msg db "Welcome to KAsm by KoKa" ; only a-zA-Z and spaces supported
+endIndex equ $$ + $DATAPTR
+
+mov ecx, msg
+xwr " " ; print char so I can start loop with removing last char
+
+loop:
+   xwr "\b" ; remove last char
+   call randomChar ; generate random letter a-zA-Z
+   
+   xwr edx ; print generated letter
+   xslp 1 ; sleep for 1ms
+   
+   cmp [ecx], edx ; check if generated letter matches with letter in message
+   jne loop ; if it does not match then try again
+   
+   next: ; if the char matches message letter, or is space
+   inc ecx ; increase pointer that points at letter we try to match
+   cmp ecx, endIndex ; check if pointer reaches end of message
+   je end ; then finish message
+   xwr " " ; if not print space so matched letter wont be removed at the loop start or if we need to skip space
+   
+   cmp [ecx], " " ; if space then move pointer one more place forward
+   je next
+   
+   jmp loop
+   
+end:
+   xwr " "
+   xwr "😊"
+   xwr "\n"
+   jmp $EXIT
+
+randomChar:     ; result in edx
+   xrnd
+   mov ebx, eax
+   and ebx, 1
+   shr eax, 1   ; removes lsb that determines case, and makes number always positive moving sign bit
+   div 26       ; make random number [0, 25]
+   cmp ebx, 1
+   jz rc_upperCase ; ebx = 1, generate upper case character
+   add edx, "a"    ; ebx = 0, generate lower case character
+   jmp rc_end
+   rc_upperCase:
+      add edx, "A"
+   rc_end:
+   ret

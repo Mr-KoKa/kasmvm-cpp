@@ -1,0 +1,39 @@
+prompt db "Enter iterations count:"
+promptLen equ $$ - prompt + $DATAPTR
+info db "Performing iterations...\n"
+infoLen equ $$ - info + $DATAPTR
+error db "Invalid number.\n"
+errorLen equ $$ - error + $DATAPTR
+errorNegative db "Iterations count has to be positive number.\n"
+errorNegativeLen equ $$ - errorNegative + $DATAPTR
+input rb 12
+inputLen equ $$ - input + $DATAPTR
+
+xwr prompt, promptLen
+xrd input, inputLen
+xflush
+sub eax, 1
+xti input, eax
+jo invalid
+mov ebx, eax
+cmp ebx, 0
+jl negative
+
+xwr info, infoLen
+mov eax, 0
+
+loop:
+   cmp eax, ebx
+   jz $EXIT
+   add eax, 1
+   jmp loop
+
+jmp $EXIT
+
+negative:
+   xwr errorNegative, errorNegativeLen
+   jmp $EXIT
+
+invalid:
+   xwr error, errorLen
+   jmp $EXIT

@@ -1,0 +1,44 @@
+prompt1 db "Enter \"1234\" and confirm with enter key:"
+prompt1Len equ $$ - prompt1 + $DATAPTR
+prompt2 db "Enter at least 4 characters:"
+prompt2Len equ $$ - prompt2 + $DATAPTR
+buff rb 3
+
+xwr prompt1, prompt1Len
+xrd buff, 3 ; read 3 characters from console
+            ; at this point the stdin buffer is empty so xrd instruction call
+            ; will block the program execution until input in the console is provided
+            ; try to write more than 3 characters, like "1234" and confirm with enter
+            ; this way stdin buffer will receive "1", "2", "3", "4", "\n" characters
+            ; two of which will be read by xrd and "4", "\n" will remain in the stdin buffer
+            
+xwr buff, 3
+xwr "\n" 
+            
+xrd buff, 2 ; this time xrd wont wait for input and block, it will return immediately
+            ; because the stdin buffer hold, "4", "\n" characters
+
+xwr buff, 2 ; notice we read and write 2 characters as the third character in memory is "3" as leftover from last xrd
+            ; this way we will output 2 new characters from stdin ("4", "\n") and not additional old one
+xwr "\n"    ; additional new line
+
+            ; console output should be:
+            ; 123
+            ; 4
+            ;    <- additional new line
+            
+            ; at this point the stdin buffer should be empty as long as "1234" was input you confirmed with enter key
+xflush      ; but we will use xflush instruction to clear the stdin buffer so no matter what was the input now next xrd
+            ; will block and wait for fresh input
+
+xwr prompt2, prompt2Len            
+xrd buff, 3 ; read new 3 characters
+
+xwr buff, 3 ; print the 3 characters of what we just read from the console
+xwr "\n"
+
+            ; console output should be:
+            ; xxx <- 3 first characters of whatever your input was + new line char
+
+xflush      ; flush stdin so any remainder of input from the stdin buffer wont spill over to the console after program 
+            ; execution finish and won't be interpreted as a command
